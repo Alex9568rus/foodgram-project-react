@@ -76,6 +76,11 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscribeListSerializer(serializers.ModelSerializer):
+    email = serializers.ReadOnlyField(source='following.email')
+    id = serializers.ReadOnlyField(source='following.id')
+    username = serializers.ReadOnlyField(source='following.username')
+    first_name = serializers.ReadOnlyField(source='following.first_name')
+    last_name = serializers.ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -91,17 +96,19 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        subscribe = Follow.objects.filter(user=request.user, following=obj)
+        subscribe = Follow.objects.filter(
+            user=request.user, following=obj.following
+        )
         return subscribe.exists()
 
-    def get_resipes(self, obj):
+    def get_recipes(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipe_limit')
         recipes = (
-            obj.author.recipe.all()[:int(limit)] if limit
-            else obj.author.recipe.all()
+            obj.following.recipes.all()[:int(limit)] if limit
+            else obj.following.recipes.all()
         )
         return SubscribeRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
-        return obj.recipes.count()
+        return obj.following.recipes.count()

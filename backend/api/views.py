@@ -9,19 +9,21 @@ from reportlab.pdfbase import ttfonts, pdfmetrics
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 
-from users.serializers import SubscribeRecipeSerializer
 from api.mixins import ListAndRetrieveViewSet
 from api.models import (
     Cart, FavoriteRecipe, Recipe, Ingredient, IngredienInRecipe, Tag
 )
 from api.filters import IngredientFilter, RecipesByTagsFilter
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (CartSerializer, CreateRecipeSerializer,
-                             FavoriteSerializer, IngredientSerializer,
-                             RecipeSerializer, TagSerializer)
+from api.serializers import (
+    CartSerializer, CreateRecipeSerializer, FavoriteSerializer,
+    IngredientSerializer, RecipeSerializer, TagSerializer
+)
+from foodgram.settings import X_POSITION, Y_POSITION, STRING_GAP, FILE_NAME
+from users.serializers import SubscribeRecipeSerializer
 
 
 class TagViewSet(ListAndRetrieveViewSet):
@@ -48,7 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'user')
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in SAFE_METHODS:
             return RecipeSerializer
         return CreateRecipeSerializer
 
@@ -109,13 +111,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).order_by('ingredient__name').annotate(
             amount=Sum('amount')
         )
-        file_name = 'ingredients_in_cart.pdf'
-        x_position, y_position, string_gap = 50, 800, 20
+        y_position = Y_POSITION
         if shopping_list:
             for index, recipe in enumerate(shopping_list, start=1):
                 page.setFont('FreeSans', 15)
                 page.drawString(
-                    x_position, y_position - string_gap,
+                    X_POSITION, y_position - STRING_GAP,
                     f'{index}) {recipe["ingredient__name"]}'
                     f'({recipe["ingredient__measurement_unit"]})'
                     f' - {recipe["amount"]}'
@@ -123,16 +124,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 y_position -= 15
                 if y_position <= 50:
                     page.showPage()
-                    y_position = 800
+                    y_position = Y_POSITION
             page.save()
             buffer.seek(0)
             return FileResponse(
-                buffer, as_attachment=True, filename=file_name
+                buffer, as_attachment=True, filename=FILE_NAME
             )
         page.setFont('FreeSans', 25)
         page.drawString(
-            x_position, y_position, 'Нет покупок!'
+            X_POSITION, Y_POSITION, 'Нет покупок!'
         )
         page.save()
         buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename=file_name)
+        return FileResponse(buffer, as_attachment=True, filename=FILE_NAME)
