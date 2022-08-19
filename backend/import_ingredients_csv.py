@@ -1,17 +1,12 @@
 import csv
+import django
 import os
-
+from api.models import Ingredient
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", 'foodgram.settings')
 
 
-import django
-
-
 django.setup()
-
-
-from api.models import Ingredient
 
 
 path = '../data'
