@@ -14,7 +14,7 @@ django.setup()
 from api.models import Ingredient
 
 
-path = '../data'
+path = './data'
 os.chdir(path)
 
 
