@@ -22,9 +22,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='testkey')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '0.0.0.0', '127.0.0.1', 'localhost', '158.160.6.68', 'zao.ddns.net'
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
