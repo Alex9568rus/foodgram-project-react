@@ -1,5 +1,6 @@
-from api.models import (Cart, FavoriteRecipe, IngredienInRecipe, Ingredient,
-                        Recipe, Tag)
+from api.models import (
+    Cart, FavoriteRecipe, IngredienInRecipe, Ingredient, Recipe, Tag
+)
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -95,13 +96,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         )
 
     def validate_ingredients(self, data):
-        ingredients = data['ingredients']
-        if not ingredients:
+        if not data:
             raise serializers.ValidationError(
                 'Нужно добавить ингредиент'
             )
         ingredients_list = []
-        for ingredient in ingredients:
+        for ingredient in data:
             id = ingredient['id']
             if id in ingredients_list:
                 raise serializers.ValidationError(
@@ -116,13 +116,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def validate_tags(self, data):
-        tags = data['tags']
-        if not tags:
+        if not data:
             raise serializers.ValidationError(
                 'Нужно дабавить тег'
             )
         tag_list = []
-        for tag in tags:
+        for tag in data:
             if tag in tag_list:
                 raise serializers.ValidationError(
                     'Такой тег уже добавлен'
@@ -131,8 +130,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def validate_cooking_time(self, data):
-        cooking_time = data['cooking_time']
-        if int(cooking_time) < 1:
+        if int(data) < 1:
             raise serializers.ValidationError(
                 'Время приготовления должно быть >= 1 мин'
             )
