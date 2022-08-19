@@ -23,7 +23,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='testkey')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '0.0.0.0', '127.0.0.1', 'localhost', '158.160.9.239', 'zao.hopto.org'
+    '*'
 ]
 
 
