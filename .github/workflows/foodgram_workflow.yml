@@ -52,6 +52,7 @@ jobs:
         with:
           push: true
           context: backend/
+          file: backend/Dockerfile
           tags: ${{ secrets.USERNAME }}/foodgram_back:v20.08.22
 
       - name: Pushing frontend to DockerHub
@@ -59,7 +60,8 @@ jobs:
         with:
           push: true
           context: frontend/
-          tags: ${{ secrets.USERNAME }}/foodgram_front:v.20.08.22
+          file: frontend/Dockerfile
+          tags: ${{ secrets.USERNAME }}/foodgram_front:v20.08.22
 
       - name: Send message if build/push failed
         if: ${{ failure() }}
