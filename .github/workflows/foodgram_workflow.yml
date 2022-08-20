@@ -52,14 +52,14 @@ jobs:
         with:
           push: true
           context: backend/
-          tags: ${{ secrets.USERNAME }}/foodgram:latest
+          tags: ${{ secrets.USERNAME }}/foodgram_back:v20.08.22
 
       - name: Pushing frontend to DockerHub
         uses: docker/build-push-action@v2
         with:
           push: true
           context: backend/
-          tags: ${{ secrets.USERNAME }}/foodgram_front:latest
+          tags: ${{ secrets.USERNAME }}/foodgram_front:v.20.08.22
 
       - name: Send message if build/push failed
         if: ${{ failure() }}
@@ -82,8 +82,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull ${{ secrets.USERNAME }}/foodgram:latest
-            sudo docker pull ${{ secrets.USERNAME }}/foodgram_front:latest
+            sudo docker pull ${{ secrets.USERNAME }}/foodgram_back:v20.08.22
+            sudo docker pull ${{ secrets.USERNAME }}/foodgram_front:v.20.08.22
             sudo docker-copmose stop
             sudo docker-compose rm backend
             touch .env
