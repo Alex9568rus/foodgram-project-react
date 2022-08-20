@@ -58,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: backend/
+          context: frontend/
           tags: ${{ secrets.USERNAME }}/foodgram_front:v.20.08.22
 
       - name: Send message if build/push failed
