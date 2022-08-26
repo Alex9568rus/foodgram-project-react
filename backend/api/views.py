@@ -38,7 +38,7 @@ class IngredientViewSet(ListAndRetrieveViewSet):
     permission_classes = (AllowAny, )
     filter_backends = (DjangoFilterBackend, )
     filter_class = IngredientFilter
-    search_fields = ('name', )
+    search_fields = ('^name', )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
