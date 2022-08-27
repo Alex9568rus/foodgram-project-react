@@ -8,15 +8,6 @@ class User(AbstractUser):
         max_length=254,
         verbose_name='Адрес электронной почты'
     )
-    password = models.CharField(
-        max_length=150,
-        verbose_name='Пароль'
-    )
-    username = models.CharField(
-        max_length=150,
-        unique=True,
-        verbose_name='Уникальный юзернейм'
-    )
     first_name = models.CharField(
         max_length=150,
         verbose_name='Имя'
@@ -26,6 +17,8 @@ class User(AbstractUser):
         verbose_name='Фамилия'
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name', 'password')
     class Meta:
         ordering = ['id']
 
@@ -33,7 +26,7 @@ class User(AbstractUser):
         return self.username
 
 
-class Follow(models.Model):
+class Subscribe(models.Model):
     user = models.ForeignKey(
         User,
         verbose_name='Подписчик',
@@ -41,7 +34,7 @@ class Follow(models.Model):
         null=True,
         on_delete=models.CASCADE
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         User,
         verbose_name='Автор, на которого подписываться',
         related_name='following',
@@ -51,6 +44,6 @@ class Follow(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'following'], name='unique_links'
+                fields=['user', 'author'], name='unique_links'
             ),
         ]

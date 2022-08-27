@@ -54,11 +54,13 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='IngredienInRecipe',
+        through='IngredientRecipe',
+        related_name='recipes',
         verbose_name='Список ингредиентов'
     )
     tags = models.ManyToManyField(
         Tag,
+        related_name='recipes',
         verbose_name='Список id тегов'
     )
     image = models.ImageField(
@@ -81,17 +83,24 @@ class Recipe(models.Model):
         ),
         default=1
     )
+    pub_date = models.DateField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ['pub_date']
 
 
-class IngredienInRecipe(models.Model):
+class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='ingredients_list',
         verbose_name='Ингредиент в рецепте'
     )
     recipe = models.ForeignKey(
         Recipe,
+        related_name='ingredient_in_recipe',
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
@@ -114,17 +123,17 @@ class IngredienInRecipe(models.Model):
         ]
 
 
-class FavoriteRecipe(models.Model):
+class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorites',
+        related_name='favorite',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorites',
+        related_name='favorite',
         verbose_name='Избранный рецепт'
     )
 
@@ -137,17 +146,17 @@ class FavoriteRecipe(models.Model):
         ]
 
 
-class Cart(models.Model):
+class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shoping_carts',
+        related_name='shoping_cart',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shoping_catrs',
+        related_name='shoping_catr',
         verbose_name='Рецепт в покупках'
     )
 
@@ -155,6 +164,7 @@ class Cart(models.Model):
         ordering = ['id']
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_recipes_in_cart'
+                fields=['user', 'recipe'],
+                name='unique_recipes_in_cart'
             ),
         ]

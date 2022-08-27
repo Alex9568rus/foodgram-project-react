@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import (Cart, FavoriteRecipe, IngredienInRecipe, Ingredient,
+from recipes.models import (ShoppingCart, Favorite, IngredientRecipe, Ingredient,
                         Recipe, Tag)
 
 
@@ -12,7 +12,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class IngredientsInRecipeAdmin(admin.StackedInline):
-    model = IngredienInRecipe
+    model = IngredientRecipe
     autocomplete_fields = ('ingredient', )
 
 
@@ -33,14 +33,14 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(FavoriteRecipe)
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_filter = ('user', 'recipe')
     empty_value_display = '-пусто-'
 
 
-@admin.register(Cart)
+@admin.register(ShoppingCart)
 class CartAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_filter = ('user', 'recipe')

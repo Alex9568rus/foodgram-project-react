@@ -1,9 +1,11 @@
 from django_filters.rest_framework import filters, FilterSet
-from api.models import Recipe
+from recipes.models import Recipe
 
 
 class IngredientFilter(FilterSet):
-    search_param = 'name'
+    name = filters.CharFilter(
+        field_name='name', lookup_expr='istartwith'
+    )
 
 
 class RecipesByTagsFilter(FilterSet):

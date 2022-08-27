@@ -6,9 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-FILE_NAME = 'ingredients_in_cart.pdf'
-X_POSITION, Y_POSITION, STRING_GAP = 50, 800, 20
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -40,6 +37,7 @@ INSTALLED_APPS = [
     'djoser',
     'colorfield',
     'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig'
 ]
 
@@ -138,24 +136,28 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ]
 }
 
 
-DJOSER = {
-    'LOGIN_FIELD': 'email',
-    'SERIALIZERS': {
-        'user_create': 'users.serializers.UserRegistrationSerializer',
-        'user': 'users.serializers.CustomUserSerializer',
-        'current_user': 'users.serializers.CustomUserSerializer'
-    },
-    'PERMISSONS': {
-        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
-        'user_list': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
-    },
-    'HIDE_USERS': False
-}
+#DJOSER = {
+#    'LOGIN_FIELD': 'email',
+#    'SERIALIZERS': {
+#        'user_create': 'users.serializers.UserRegistrationSerializer',
+#        'user': 'users.serializers.CustomUserSerializer',
+#        'current_user': 'users.serializers.CustomUserSerializer'
+#    },
+#    'PERMISSONS': {
+#        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
+#        'user_list': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
+#    },
+#    'HIDE_USERS': False
+#}
