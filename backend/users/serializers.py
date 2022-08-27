@@ -103,12 +103,14 @@ class SubscribeListSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        limit = request.GET.get('recipe_limit')
+        if not request or request.user.is_anonymous:
+            return False
+        context = {'request': request}
+        limit = request.query_param.get('recipes_limit')
         recipes = (
-            obj.following.recipes.all()[:int(limit)] if limit
-            else obj.following.recipes.all()
+            obj.recipes.all()[:int(limit)] if limit
+            else obj.recipes.all()
         )
-        return SubscribeRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         return obj.following.recipes.count()

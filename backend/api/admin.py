@@ -19,13 +19,10 @@ class IngredientsInRecipeAdmin(admin.StackedInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (IngredientsInRecipeAdmin, )
-    list_display = ('id', 'name', 'author', 'num_favorites')
+    list_display = ('id', 'name', 'author')
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
-
-    def num_favorites(self, obj):
-        return obj.favorites.count
 
 
 @admin.register(Ingredient)

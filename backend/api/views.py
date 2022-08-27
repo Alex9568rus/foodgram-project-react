@@ -37,7 +37,7 @@ class IngredientViewSet(ListAndRetrieveViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny, )
     filterset_class = IngredientFilter
-    search_fields = ('^name', )
+    search_fields = ('name', )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

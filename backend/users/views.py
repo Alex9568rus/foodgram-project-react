@@ -1,10 +1,10 @@
 from rest_framework import status
 from rest_framework.generics import ListAPIView, get_object_or_404
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.pagination import Pagination
 from users.models import Follow, User
 from users.serializers import SubscribeListSerializer, SubscribeSerializer
 
@@ -33,7 +33,7 @@ class SubscribeAPIView(APIView):
 
 class SubscribeListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated, )
-    pagination_class = PageNumberPagination
+    pagination_class = Pagination
     serializer_class = SubscribeListSerializer
 
     def get_queryset(self):
