@@ -107,6 +107,7 @@ class SubscribeListSerializer(serializers.ModelSerializer):
             obj.recipes.all()[:int(recipes_limit)]
             if recipes_limit else obj.recipes
         )
+        return SubscribeRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
