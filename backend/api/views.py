@@ -1,5 +1,5 @@
 from django.db.models.aggregates import Sum
-from django.http import FileResponse, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser import serializers
 from rest_framework import status, viewsets, validators
@@ -31,7 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = serializer.save()
         user.set_passpord(password)
         user.save()
-    
+
     @action(detail=False, methods=['GET'])
     def me(self, request):
         serializer = self.get_serializer(self.request.user)
@@ -102,7 +102,6 @@ class SubscribeViewSet(viewsets.ModelViewSet):
             user=request.user, author=author
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

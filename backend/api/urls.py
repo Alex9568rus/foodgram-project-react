@@ -26,9 +26,9 @@ urlpatterns = [
         name='subscriptions'
     ),
     path(
-        'auth/token/login/', TokenCreateView.as_view(), 
+        'auth/token/login/', TokenCreateView.as_view(),
         name='create_token'
     ),
-    path('auth/token/logout/', TokenDestroyView.as_view(), 
-    name='delete_token')
+    path('auth/token/logout/', TokenDestroyView.as_view(),
+        name='delete_token')
 ]
