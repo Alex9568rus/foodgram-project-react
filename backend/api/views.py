@@ -17,7 +17,8 @@ from api.models import (
     Cart, FavoriteRecipe, Recipe, Ingredient, IngredienInRecipe, Tag
 )
 from api.filters import IngredientFilter, RecipesByTagsFilter
-from api.permissions import IsAuthorOrReadOnly
+from api.pagination import Pagination
+from api.permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
 from api.serializers import (
     CartSerializer, CreateRecipeSerializer, FavoriteSerializer,
     IngredientSerializer, RecipeSerializer, TagSerializer
@@ -29,24 +30,23 @@ from users.serializers import SubscribeRecipeSerializer
 class TagViewSet(ListAndRetrieveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAdminOrReadOnly, )
 
 
 class IngredientViewSet(ListAndRetrieveViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny, )
-    filter_backends = (DjangoFilterBackend, )
-    filter_class = IngredientFilter
+    filterset_class = IngredientFilter
     search_fields = ('^name', )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly, )
+    permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly)
     filter_backends = (DjangoFilterBackend, )
-    filter_class = RecipesByTagsFilter
-    pagination_class = PageNumberPagination
+    filterset_class = RecipesByTagsFilter
+    pagination_class = Pagination
     search_fields = ('name', 'user')
 
     def get_serializer_class(self):
@@ -94,6 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @action(
+        methods=['GET', ],
         detail=False,
         permission_classes=(IsAuthenticated, )
     )

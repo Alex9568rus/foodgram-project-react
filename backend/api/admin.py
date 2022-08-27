@@ -10,19 +10,22 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name', 'color', 'slug')
     empty_value_display = '-пусто-'
 
-
-class IngrdientsInRecipeAdmin(admin.StackedInline):
+@admin.register(IngredienInRecipe)
+class IngredientsInRecipeAdmin(admin.StackedInline):
     model = IngredienInRecipe
-    autocomplete_fields = ('ingredient', )
+    autocomplete_fields = ('id', 'ingredient', 'recipe', 'amount')
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    inlines = (IngrdientsInRecipeAdmin, )
-    list_display = ('id', 'name', 'author')
+    inlines = (IngredientsInRecipeAdmin, )
+    list_display = ('id', 'name', 'author', 'num_favorites')
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
+
+    def num_favorites(self, obj):
+        return obj.favorites.count
 
 
 @admin.register(Ingredient)

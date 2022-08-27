@@ -1,9 +1,10 @@
-from api.models import (
-    Cart, FavoriteRecipe, IngredienInRecipe, Ingredient, Recipe, Tag
-)
+from multiprocessing import context
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from api.models import (
+    Cart, FavoriteRecipe, IngredienInRecipe, Ingredient, Recipe, Tag
+)
 from users.models import User
 from users.serializers import CustomUserSerializer
 
@@ -13,6 +14,15 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'slug', 'color')
+
+
+class TagsField(serializers.SlugRelatedField):
+
+    def to_representation(self, obj):
+        request = self.context.get('request')
+        context = {'request': request}
+        serializer = TagSerializer(obj, context=context)
+        return serializer.data
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -53,7 +63,9 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
-    tags = TagSerializer(many=True)
+    tags = TagsField(
+        slug_field='id', queryset=Tag.objects.all(), many=True
+    )
     ingredients = IngredienInRecipeSerializer(many=True, read_only=True)
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
