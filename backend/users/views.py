@@ -11,6 +11,7 @@ from users.serializers import SubscribeListSerializer, SubscribeSerializer
 
 class SubscribeAPIView(APIView):
     permission_classes = (IsAuthenticated,)
+    pagination_class = Pagination
 
     def post(self, request, id):
         author = get_object_or_404(User, id=id)
