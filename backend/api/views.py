@@ -50,7 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'user')
 
     def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
+        if self.action in ('list', 'retrieve'):
             return RecipeSerializer
         return CreateRecipeSerializer
 
