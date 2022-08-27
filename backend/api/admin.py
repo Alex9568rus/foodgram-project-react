@@ -11,8 +11,7 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(IngredienInRecipe)
-class IngredientsInRecipeAdmin(admin.ModelAdmin):
+class IngredientsInRecipeAdmin(admin.StackedInline):
     model = IngredienInRecipe
     autocomplete_fields = ('id', 'ingredient', 'recipe', 'amount')
 
