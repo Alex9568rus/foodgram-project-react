@@ -10,6 +10,7 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name', 'color', 'slug')
     empty_value_display = '-пусто-'
 
+
 @admin.register(IngredienInRecipe)
 class IngredientsInRecipeAdmin(admin.StackedInline):
     model = IngredienInRecipe

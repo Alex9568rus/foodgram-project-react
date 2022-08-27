@@ -8,8 +8,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import ttfonts, pdfmetrics
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from api.mixins import ListAndRetrieveViewSet
