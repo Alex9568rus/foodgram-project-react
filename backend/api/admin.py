@@ -12,7 +12,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 @admin.register(IngredienInRecipe)
-class IngredientsInRecipeAdmin(admin.StackedInline):
+class IngredientsInRecipeAdmin(admin.ModelAdmin):
     model = IngredienInRecipe
     autocomplete_fields = ('id', 'ingredient', 'recipe', 'amount')
 
