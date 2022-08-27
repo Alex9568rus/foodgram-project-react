@@ -47,7 +47,7 @@ class IngredienInRecipeSerializer(serializers.ModelSerializer):
                 fields=('ingredient', 'recipe')
             ),
         )
-    
+
     def __str__(self):
         return f'{self.ingredient} in {self.recipe}'
 
