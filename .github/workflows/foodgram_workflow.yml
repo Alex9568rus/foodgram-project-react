@@ -99,7 +99,6 @@ jobs:
             sudo docker-compose up -d
             sudo docker-compose exec backend python3 manage.py migrate
             sudo docker-compose exec backend python3 manage.py collectstatic --no-input
-            sudo docker-compose exec backend python3 import_ingredients_csv.py
       
       - name: Send message if deploy failed
         if: ${{ failure() }}
