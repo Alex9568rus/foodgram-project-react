@@ -110,6 +110,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
         model = IngredientRecipe
         fields = ('id', 'amount')
 
+
 class CreateRecipeSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -269,6 +270,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
         if limit is not None:
             recipes = obj.recipes.all()[:int(limit)]
         return SimpleSubscribeSerializer(recipes, many=True).data
-    
+
     def get_recipes_count(self, obj):
         return obj.recipes.count()

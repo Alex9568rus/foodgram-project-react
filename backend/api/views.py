@@ -2,8 +2,8 @@ from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from djoser import serializers, views
-from rest_framework import status, viewsets, validators
+from djoser import views
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -112,7 +112,9 @@ class IngredientViewSet(ListAndRetrieveViewSet):
 #                 'Вы уже подписаны на автора!'
 #             )
 #         Subscribe.objects.create(user=request.user, author=author)
-#         serializer = SubscribeSerializer(author, context={'request': request})
+#         serializer = SubscribeSerializer(
+#             author, context={'request': request}
+#         )
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 #     def destroy(self, request, id):
