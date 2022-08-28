@@ -95,12 +95,10 @@ class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredients_list',
         verbose_name='Ингредиент в рецепте'
     )
     recipe = models.ForeignKey(
         Recipe,
-        related_name='ingredient_in_recipe',
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
@@ -127,13 +125,13 @@ class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorite',
+        related_name='favorites',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorite',
+        related_name='favorites',
         verbose_name='Избранный рецепт'
     )
 
@@ -150,13 +148,13 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shoping_cart',
+        related_name='shopping_cart',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shoping_catr',
+        related_name='shopping_catr',
         verbose_name='Рецепт в покупках'
     )
 

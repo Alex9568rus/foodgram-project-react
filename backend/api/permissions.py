@@ -1,14 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class ListOrCriatePermission(BasePermission):
-
-    def has_permission(self, request, view):
-        if view.action in ['list', 'create']:
-            return True
-        return request.user.is_authenticated
-
-
 class IsAuthorOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):

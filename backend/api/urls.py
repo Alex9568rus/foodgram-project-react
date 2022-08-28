@@ -16,20 +16,22 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path(
-        'usres/<int:id>/subscribe/',
-        SubscribeViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
-        name='subscribe'
-    ),
-    path(
-        'users/subscriptions/', SubscribeViewSet.as_view({'get': 'list'}),
-        name='subscriptions'
-    ),
-    path(
-        'auth/token/login/', TokenCreateView.as_view(),
-        name='create_token'
-    ),
-    path(
-        'auth/token/logout/', TokenDestroyView.as_view(), name='delete_token'
-    ),
+    path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
+    #path(
+    #    'usres/<int:id>/subscribe/',
+    #    SubscribeViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
+    #    name='subscribe'
+    #),
+    #path(
+    #    'users/subscriptions/', SubscribeViewSet.as_view({'get': 'list'}),
+    #    name='subscriptions'
+    #),
+    #path(
+    #    'auth/token/login/', TokenCreateView.as_view(),
+    #    name='create_token'
+    #),
+    #path(
+    #    'auth/token/logout/', TokenDestroyView.as_view(), name='delete_token'
+    #),
 ]
