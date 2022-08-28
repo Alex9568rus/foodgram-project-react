@@ -34,10 +34,10 @@ class UserViewSet(viewsets.ModelViewSet):
         user.set_passpord(password)
         user.save()
 
-    @action(detail=False, methods=['GET'])
-    def me(self, request):
-        serializer = self.get_serializer(self.request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #@action(detail=False, methods=['GET'])
+    #def me(self, request):
+    #    serializer = self.get_serializer(self.request.user)
+    #    return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'])
     def set_password(self, request):
