@@ -16,11 +16,11 @@ class RecipesByTagsFilter(FilterSet):
     tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug'
     )
-    is_favorited = filters.BooleanFilter(
-        method='get_is_favorited'
+    is_favorited = filters.CharFilter(
+        method='filter_is_favorited'
     )
-    is_in_shoping_cart = filters.BooleanFilter(
-        method='get_is_in_shoping_cart'
+    is_in_shoping_cart = filters.CharFilter(
+        method='filter_is_in_shopping_cart'
     )
 
     class Meta:
@@ -38,7 +38,7 @@ class RecipesByTagsFilter(FilterSet):
             ).distinct()
         return queryset
 
-    def filter_is_in_shoping_cart(self, queryset, is_in_shoping_cart, slug):
+    def filter_is_in_shopping_cart(self, queryset, is_in_shopping_cart, slug):
         if self.request.user.is_authenticated:
             return queryset
         if self.request.query_params.get('is_in_shoping_cart'):
