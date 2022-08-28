@@ -9,7 +9,9 @@ from rest_framework.response import Response
 
 from api.mixins import ListAndRetrieveViewSet
 from api.filters import IngredientFilter, RecipesByTagsFilter
-from api.permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
+from api.permissions import (
+    IsAuthorOrReadOnly, IsAdminOrReadOnly, ListOrCriatePermission
+)
 from api.serializers import (
     CreateRecipeSerializer, IngredientSerializer, RecipeSerializer,
     TagSerializer, UserSerializer, SimpleRecipeSerializer,
@@ -24,7 +26,7 @@ from users.models import User, Subscribe
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (ListOrCriatePermission, )
 
     def perform_create(self, serializer):
         password = serializer.validated_data['password']

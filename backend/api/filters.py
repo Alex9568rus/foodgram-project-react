@@ -19,14 +19,14 @@ class RecipesByTagsFilter(FilterSet):
     is_favorited = filters.CharFilter(
         method='filter_is_favorited'
     )
-    is_in_shoping_cart = filters.CharFilter(
+    is_in_shopping_cart = filters.CharFilter(
         method='filter_is_in_shopping_cart'
     )
 
     class Meta:
         model = Recipe
         fields = (
-            'tags', 'author'
+            'tags', 'author', 'is_favorited', 'is_in_shopping_cart'
         )
 
     def filter_is_favorited(self, queryset, is_favorited, slug):
