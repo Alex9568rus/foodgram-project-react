@@ -1,16 +1,10 @@
 from django_filters.rest_framework import filters, FilterSet
-from recipes.models import Recipe, Ingredient, Tag
+from recipes.models import Recipe, Tag
 from users.models import User
 
 
 class IngredientFilter(FilterSet):
-    name = filters.CharFilter(
-        field_name='name', lookup_expr='startwith'
-    )
-
-    class Meta:
-        model = Ingredient
-        fields = ('name', )
+    search_param = 'name'
 
 
 class RecipesByTagsFilter(FilterSet):
@@ -34,11 +28,11 @@ class RecipesByTagsFilter(FilterSet):
         )
 
     def filter_is_favorited(self, queryset, name, value):
-        if value:
+        if value and not self.request.user.is_anonymous:
             return queryset.filter(favorites__user=self.request.user)
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
-        if value:
+        if value and not self.request.user.is_anonymous:
             return queryset.filter(cart__user=self.request.user)
         return queryset

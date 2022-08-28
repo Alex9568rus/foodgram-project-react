@@ -95,6 +95,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         return CreateRecipeSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
     def adding(self, model, user, id):
         if model.objects.filter(user=user, recipe__id=id).exists():
             raise RecipeExistingError('Рецепт уже добавлен')
