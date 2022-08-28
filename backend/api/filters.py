@@ -1,4 +1,3 @@
-from urllib import request
 from django_filters.rest_framework import filters, FilterSet
 from recipes.models import Recipe, Ingredient
 
@@ -9,7 +8,7 @@ class IngredientFilter(FilterSet):
     )
 
     class Meta:
-        model =Ingredient
+        model = Ingredient
         fields = ('name', )
 
 
