@@ -55,12 +55,10 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientRecipe',
-        related_name='recipes',
         verbose_name='Список ингредиентов'
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='recipes',
         verbose_name='Список id тегов'
     )
     image = models.ImageField(
@@ -83,23 +81,22 @@ class Recipe(models.Model):
         ),
         default=1
     )
-    pub_date = models.DateField(
-        auto_now_add=True
-    )
 
     class Meta:
-        ordering = ['pub_date']
+        ordering = ['-id']
 
 
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        related_name='recipe_ingredient',
         verbose_name='Ингредиент в рецепте'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
+        related_name='recipe_ingredient',
         verbose_name='Рецепт'
     )
     amount = models.PositiveIntegerField(
@@ -148,13 +145,13 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
+        related_name='cart',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_catr',
+        related_name='catr',
         verbose_name='Рецепт в покупках'
     )
 

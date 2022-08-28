@@ -13,7 +13,7 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-class IngredientsInRecipeAdmin(admin.StackedInline):
+class IngredientsInRecipeAdmin(admin.TabularInline):
     model = IngredientRecipe
     autocomplete_fields = ('ingredient', )
 
