@@ -38,7 +38,7 @@ class RecipesByTagsFilter(FilterSet):
             ).distinct()
         return queryset
 
-    def get_is_in_shoping_cart(self, queryset, is_in_shoping_cart, slug):
+    def filter_is_in_shoping_cart(self, queryset, is_in_shoping_cart, slug):
         if self.request.user.is_authenticated:
             return queryset
         if self.request.query_params.get('is_in_shoping_cart'):
