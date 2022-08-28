@@ -57,6 +57,7 @@ class TagViewSet(ListAndRetrieveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = None
 
 
 class IngredientViewSet(ListAndRetrieveViewSet):
@@ -64,7 +65,8 @@ class IngredientViewSet(ListAndRetrieveViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny, )
     filterset_class = IngredientFilter
-    search_fields = ('name', )
+    #search_fields = ('name', )
+    pagination_class = None
 
 
 class SubscribeViewSet(viewsets.ModelViewSet):
@@ -110,12 +112,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly)
     filterset_class = RecipesByTagsFilter
-    search_fields = ('name', 'user')
+    #search_fields = ('name', 'user')
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return RecipeSerializer
         return CreateRecipeSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     def add_or_delete_recipe(self, model, request, id):
         recipe = get_object_or_404(Recipe, id=id)
