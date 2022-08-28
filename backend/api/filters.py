@@ -1,11 +1,16 @@
+from urllib import request
 from django_filters.rest_framework import filters, FilterSet
-from recipes.models import Recipe
+from recipes.models import Recipe, Ingredient
 
 
 class IngredientFilter(FilterSet):
     name = filters.CharFilter(
         field_name='name', lookup_expr='istartwith'
     )
+
+    class Meta:
+        model =Ingredient
+        fields = ('name', )
 
 
 class RecipesByTagsFilter(FilterSet):
@@ -22,15 +27,23 @@ class RecipesByTagsFilter(FilterSet):
     class Meta:
         model = Recipe
         fields = (
-            'tags', 'author'
+            'tags', 'author', 'is_favorited', 'is_in_shopping_cart'
         )
 
-    def get_is_favorited(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
-            return queryset.filter(favorite__user=self.request.user)
+    def filter_is_favorited(self, queryset, is_favorited, slug):
+        if self.request.user.is_authenticated:
+            return queryset
+        if self.request.query_params.get('is_favorited'):
+            return queryset.filter(
+                favorite__user=self.request.user
+            ).distinct()
         return queryset
 
-    def get_is_in_shoping_cart(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
-            return queryset.filter(shoping_cart__user=self.request.user)
+    def get_is_in_shoping_cart(self, queryset, is_in_shoping_cart, slug):
+        if self.request.user.is_authenticated:
+            return queryset
+        if self.request.query_params.get('is_in_shoping_cart'):
+            return queryset.filter(
+                cart__user=self.request.user
+            ).distinct()
         return queryset

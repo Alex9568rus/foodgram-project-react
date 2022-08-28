@@ -144,7 +144,9 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.Pagination',
+    'PAGE_SIZE': 6
 }
 
 

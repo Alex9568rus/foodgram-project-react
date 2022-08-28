@@ -11,7 +11,7 @@ import django
 django.setup()
 
 
-from api.models import Ingredient
+from recipes.models import Ingredient
 
 
 path = './data'
