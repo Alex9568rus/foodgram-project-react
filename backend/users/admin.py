@@ -3,8 +3,11 @@ from django.contrib import admin
 from users.models import User, Follow
 
 
+admin.site.unregister(User)
+
+
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'username', 'email', 'first_name', 'last_name'
     )

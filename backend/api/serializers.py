@@ -1,7 +1,7 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueTogetherValidator
 from recipes.models import (
     IngredientRecipe, Ingredient, Recipe,
     Tag, Favorite, ShoppingCart
@@ -10,16 +10,16 @@ from users.models import Follow, User
 
 
 class CreateUserSerializer(UserCreateSerializer):
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all()),
-        ]
-    )
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all()),
-        ]
-    )
+    # email = serializers.EmailField(
+    #     validators=[
+    #         UniqueValidator(queryset=User.objects.all()),
+    #     ]
+    # )
+    # username = serializers.CharField(
+    #     validators=[
+    #         UniqueValidator(queryset=User.objects.all()),
+    #     ]
+    # )
 
     class Meta:
         model = User
@@ -123,6 +123,10 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True
+    )
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
     ingredients = AddIngredientSerializer(many=True)
@@ -176,13 +180,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def add_ingredients(self, ingredients, recipe):
-        IngredientRecipe.objects.bulk_create(
-            [IngredientRecipe(
-                ingredient=ingredient['id'],
-                recipe=recipe,
-                amount=ingredient['amount']
-            ) for ingredient in ingredients]
-        )
+        for ingredient in ingredients:
+            id = ingredient['id']
+            amount = ingredient['amount']
+            IngredientRecipe.objects.bulk_create(
+                [IngredientRecipe(
+                    ingredient=id, recipe=recipe, amount=amount
+                ), ]
+            )
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
