@@ -84,7 +84,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull ${{ secrets.USERNAME }}/foodgram_back:v28.08.22
+            sudo docker pull ${{ secrets.USERNAME }}/foodgram_back:v29.08.22
             sudo docker pull ${{ secrets.USERNAME }}/foodgram_front:v27.08.22
             sudo docker-copmose stop
             sudo docker-compose rm backend
