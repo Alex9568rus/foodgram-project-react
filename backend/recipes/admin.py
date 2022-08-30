@@ -1,49 +1,59 @@
-from django.contrib import admin
-from recipes.models import (
-    ShoppingCart, Favorite, IngredientRecipe,
-    Ingredient, Recipe, Tag
+from django.contrib.admin import ModelAdmin, TabularInline, register, site
+from django.utils.safestring import mark_safe
+
+from .models import (
+    Favorite, Ingredient, IngredientRecipe, Recipe,
+    ShoppingCart, Tag
 )
 
-
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'color', 'slug')
-    search_fields = ('name', 'slug')
-    list_filter = ('name', 'color', 'slug')
-    empty_value_display = '-пусто-'
+site.site_header = 'Админка Foodgram'
 
 
-class IngredientsInRecipeAdmin(admin.TabularInline):
+class IngredientRecipeInLine(TabularInline):
     model = IngredientRecipe
-    autocomplete_fields = ('ingredient', )
+    min_num = 1
+    extra = 1
 
 
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    inlines = (IngredientsInRecipeAdmin, )
-    list_display = ('id', 'name', 'author')
-    search_fields = ('name', 'author')
-    list_filter = ('name', 'author', 'tags')
-    empty_value_display = '-пусто-'
-
-
-@admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
+@register(Ingredient)
+class IngredientAdmin(ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
-    list_filter = ('name', )
-    search_fields = ('name', )
+    search_fields = ('name',)
+    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
-@admin.register(Favorite)
-class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'recipe')
-    list_filter = ('user', 'recipe')
-    empty_value_display = '-пусто-'
+@register(Recipe)
+class RecipeAdmin(ModelAdmin):
+    list_display = ('id',
+                    'name',
+                    'author',
+                    '_get_thumbnail',
+                    '_favorite_count'
+                    )
+    search_fields = ('name', 'author')
+    list_filter = ('name', 'author__username', 'tags')
+    inlines = (IngredientRecipeInLine,)
+    readonly_fields = ['_get_thumbnail']
+
+    def _get_thumbnail(self, obj):
+        return mark_safe(f'<img src={obj.image.url} width="80" hieght="30" />')
+
+    _get_thumbnail.short_description = 'Изображение'
+
+    def _favorite_count(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
+
+    _favorite_count.short_description = 'В избранном'
 
 
-@admin.register(ShoppingCart)
-class CartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'recipe')
-    list_filter = ('user', 'recipe')
-    empty_value_display = '-пусто-'
+@register(Tag)
+class TagAdmin(ModelAdmin):
+    list_display = ('id', 'name', 'color', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name', 'slug')
+
+
+site.register(Favorite)
+site.register(ShoppingCart)
+site.register(IngredientRecipe)
