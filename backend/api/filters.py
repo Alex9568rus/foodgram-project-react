@@ -1,10 +1,14 @@
 from django_filters.rest_framework import filters, FilterSet
-from recipes.models import Recipe, Tag
+from recipes.models import Recipe, Ingredient, Tag
 from users.models import User
 
 
 class IngredientFilter(FilterSet):
-    search_param = 'name'
+    name = filters.CharFilter(lookup_expr='istartwith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name', )
 
 
 class RecipesByTagsFilter(FilterSet):

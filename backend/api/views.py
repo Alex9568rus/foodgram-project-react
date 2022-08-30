@@ -79,7 +79,7 @@ class IngredientViewSet(ListAndRetrieveViewSet):
     permission_classes = (IsAdminOrReadOnly, )
     serializer_class = IngredientSerializer
     filter_backends = [IngredientFilter, ]
-    search_fields = ('^name', )
+    search_fields = ('name', )
     pagination_class = None
 
 
