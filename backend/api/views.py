@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -8,21 +8,20 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
-
-from recipes.models import (
-    Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from api.exceptions import (
+    SubscribeError, SubscribeYourselfError, RecipeExistingError
 )
-from users.models import Follow
-from .filters import IngredientSearchFilter, RecipeFilter
-from .utils import format_shopping_list
-from .pagination import LimitPageNumberPagination
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .serializers import (
+from recipes.models import (
+    Favorite, Ingredient, Recipe, ShoppingCart, Tag, IngredientRecipe
+)
+from api.filters import IngredientSearchFilter, RecipeFilter
+from api.pagination import LimitPageNumberPagination
+from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from api.serializers import (
     CreateUpdateRecipeSerializer, FollowSerializer, IngredientSerializer,
     ListRecipeSerializer, ShortRecipeSerializer, TagSerializer
 )
-
-User = get_user_model()
+from users.models import Follow, User
 
 
 class CustomUserViewSet(UserViewSet):
@@ -34,16 +33,10 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
-
         if user == author:
-            return Response({
-                'errors': 'На самого себя не подписаться не получится.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            raise SubscribeYourselfError('Нельзя подписаться на себя')
         if Follow.objects.filter(user=user, author=author).exists():
-            return Response({
-                'errors': 'У Вас у же есть подписка на этого автора.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
+            raise SubscribeError('Вы уже подписаны на данного автора')
         follow = Follow.objects.create(user=user, author=author)
         serializer = FollowSerializer(
             follow, context={'request': request}
@@ -55,16 +48,12 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(User, id=id)
         if user == author:
-            return Response({
-                'errors': 'Вы не можете отписываться от самого себя.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            raise SubscribeYourselfError('Нельзя отписаться от себя')
         follow = Follow.objects.filter(user=user, author=author)
         if follow.exists():
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({
-            'errors': 'Вы не подписаны на этого автора.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        raise SubscribeError('Вы не подписаны на данного автора')
 
     @action(detail=False, permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
@@ -129,25 +118,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=('get',),
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
-        user = request.user
-        if not user.cart.exists():
-            return Response({
-                'errors': 'Ваш список покупок пуст.'
-            }, status=status.HTTP_400_BAD_REQUEST
+        lines = []
+        for field in IngredientRecipe.objects.filter(
+            recipe__cart__user=request.user
+        ).values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount')):
+            lines.append(
+                f'* {field["ingredient__name"]}'
+                f'{field["ingredient__measurement_unit"]}'
+                f' - {field["amount"]}'
             )
-        filename = f'{user.username}_shopping_list.txt'
-        shopping_list = format_shopping_list(user)
+        shopping_list = '\n'.join(lines)
         response = HttpResponse(
-            shopping_list, content_type='text.txt; charset=utf-8'
+            shopping_list, content_type='application/pdf'
         )
-        response['Content-Disposition'] = f'attachment; filename={filename}'
+        response['Content-Disposition'] = (
+            'attacment; filename="ingredients_in_cart.pdf"'
+        )
         return response
 
     def add_obj(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
-            return Response({
-                'errors': 'Рецепт уже добавлен в список.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            raise RecipeExistingError('Рецепт уже добавлен')
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=user, recipe=recipe)
         serializer = ShortRecipeSerializer(recipe)
