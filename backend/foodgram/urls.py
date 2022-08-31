@@ -6,6 +6,7 @@ from api.views import (
     CustomUserViewSet, IngredientsViewSet, RecipeViewSet, TagsViewSet
 )
 
+
 router = DefaultRouter()
 router.register('users', CustomUserViewSet, basename='users')
 router.register('tags', TagsViewSet, basename='tags')

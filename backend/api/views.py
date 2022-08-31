@@ -14,7 +14,7 @@ from api.exceptions import (
 from recipes.models import (
     Favorite, Ingredient, Recipe, ShoppingCart, Tag, IngredientRecipe
 )
-from api.filters import IngredientSearchFilter, RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import Pagination
 from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from api.serializers import (
@@ -79,7 +79,7 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (IngredientSearchFilter,)
+    filter_backends = (IngredientFilter,)
     pagination_class = None
     search_fields = ('^name',)
 
@@ -99,24 +99,43 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
     def favorite(self, request, id=None):
         if request.method == 'POST':
             return self.add_obj(Favorite, request.user, id)
         elif request.method == 'DELETE':
             return self.delete_obj(Favorite, request.user, id)
 
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
     def shopping_cart(self, request, id=None):
         if request.method == 'POST':
             return self.add_obj(ShoppingCart, request.user, id)
         elif request.method == 'DELETE':
             return self.delete_obj(ShoppingCart, request.user, id)
 
-    @action(detail=False, methods=('get',),
-            permission_classes=(IsAuthenticated,))
+    def add_obj(self, model, user, id):
+        if model.objects.filter(user=user, recipe__id=id).exists():
+            raise RecipeExistingError('Рецепт уже добавлен')
+        recipe = get_object_or_404(Recipe, id=id)
+        model.objects.create(user=user, recipe=recipe)
+        serializer = ShortRecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete_obj(self, model, user, id):
+        obj = model.objects.filter(user=user, recipe__id=id)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False, methods=('get',),
+        permission_classes=(IsAuthenticated,)
+    )
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__cart__user=request.user
@@ -136,16 +155,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'attacment; filename="ingredients_in_cart.pdf"'
         )
         return response
-
-    def add_obj(self, model, user, id):
-        if model.objects.filter(user=user, recipe__id=id).exists():
-            raise RecipeExistingError('Рецепт уже добавлен')
-        recipe = get_object_or_404(Recipe, id=id)
-        model.objects.create(user=user, recipe=recipe)
-        serializer = ShortRecipeSerializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete_obj(self, model, user, id):
-        obj = model.objects.filter(user=user, recipe__id=id)
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
