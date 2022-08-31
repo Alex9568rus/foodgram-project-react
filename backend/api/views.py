@@ -109,32 +109,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
-    def favorite(self, request, id=None):
+    def favorite(self, request, pk=None):
         if request.method == 'POST':
-            return self.add_obj(Favorite, request.user, id)
+            return self.add_obj(Favorite, request.user, pk)
         elif request.method == 'DELETE':
-            return self.delete_obj(Favorite, request.user, id)
+            return self.delete_obj(Favorite, request.user, pk)
 
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
-    def shopping_cart(self, request, id=None):
+    def shopping_cart(self, request, pk=None):
         if request.method == 'POST':
-            return self.add_obj(ShoppingCart, request.user, id)
+            return self.add_obj(ShoppingCart, request.user, pk)
         elif request.method == 'DELETE':
-            return self.delete_obj(ShoppingCart, request.user, id)
+            return self.delete_obj(ShoppingCart, request.user, pk)
 
-    def add_obj(self, model, user, id):
-        if model.objects.filter(user=user, recipe__id=id).exists():
+    def add_obj(self, model, user, pk):
+        if model.objects.filter(user=user, recipe__id=pk).exists():
             return Response({
                 'errors': 'Рецепт уже добавлен в список.'
             }, status=status.HTTP_400_BAD_REQUEST)
-        recipe = get_object_or_404(Recipe, id=id)
+        recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=user, recipe=recipe)
         serializer = ShortRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete_obj(self, model, user, id):
-        obj = model.objects.filter(user=user, recipe__id=id)
+    def delete_obj(self, model, user, pk):
+        obj = model.objects.filter(user=user, recipe__id=pk)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
