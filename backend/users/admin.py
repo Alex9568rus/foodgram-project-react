@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 
-from .models import Follow
+from users.models import Follow
 
 User = get_user_model()
 admin.site.unregister(User)
