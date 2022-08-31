@@ -118,18 +118,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=('get',),
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
-        lines = []
-        for field in IngredientRecipe.objects.filter(
+        ingredients = IngredientRecipe.objects.filter(
             recipe__cart__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(amount=Sum('amount')):
-            lines.append(
-                f'* {field["ingredient__name"]}'
-                f'{field["ingredient__measurement_unit"]}'
-                f' - {field["amount"]}'
-            )
-        shopping_list = '\n'.join(lines)
+        ).annotate(amount=Sum('amount'))
+        shopping_list = '\n'.join(
+                f'* {ingredient["ingredient__name"]}'
+                f'{ingredient["ingredient__measurement_unit"]}'
+                f' - {ingredient["amount"]}'
+                for ingredient in ingredients
+        )
         response = HttpResponse(
             shopping_list, content_type='application/pdf'
         )
