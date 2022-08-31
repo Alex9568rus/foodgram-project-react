@@ -73,7 +73,7 @@ Cайт Foodgram, «Продуктовый помощник» - онлайн-с�
 * ` sudo docker-compose exec web python3 manage.py migrate` - сделать миграции;
 * ` sudo docker-compose exec web python3 manage.py createsuperuser` - создать суперюзера;
 * ` sudo docker-compose exec web python3 manage.py collectstatic --no-input` - сабрать статику
-* ` sudo docker-compose exec web python3 import_ingredients_csv.py` - для добавления игредиентов в БД
+* ` sudo docker-compose exec web python3 import_ings_and_tags_csv.py` - для добавления игредиентов в БД
 
 Чтобы создать резервную копию базы данных воспользуйтесь командой:
 
