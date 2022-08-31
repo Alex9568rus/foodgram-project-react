@@ -1,12 +1,16 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+
 from recipes.models import (
     Favorite, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag
 )
-from users.models import Follow, User
+from users.models import Follow
+
+User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -22,9 +26,16 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'first_name', 'last_name',
-            'username', 'email', 'password'
+            'id', 'first_name', 'last_name', 'username',
+            'email', 'password'
         )
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'username': {'required': True},
+            'email': {'required': True},
+            'password': {'required': True},
+        }
 
 
 class CustomUserSerializer(UserSerializer):
@@ -32,8 +43,10 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'username', 'email',
-                  'is_subscribed')
+        fields = (
+            'id', 'first_name', 'last_name', 'username', 'email',
+            'is_subscribed'
+        )
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -121,8 +134,10 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('author', 'tags', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time')
+        fields = (
+            'author', 'tags', 'ingredients', 'name',
+            'image', 'text', 'cooking_time'
+        )
 
     def validate(self, data):
         tags = data['tags']
@@ -133,7 +148,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         ingredients = data['ingredients']
         if not ingredients or len(ingredients) < 1:
             raise serializers.ValidationError(
-                'Нужно добавить ингредиент'
+                "Нужно добавить ингредиент"
             )
         ingredient_list = []
         for ingredient_item in ingredients:
@@ -142,17 +157,17 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
             if ingredient in ingredient_list:
                 raise serializers.ValidationError(
-                    'Такой ингредиент уже добавлен'
+                    'Ингредиенты не должны повторяться'
                 )
             ingredient_list.append(ingredient)
             if int(ingredient_item['amount']) <= 0:
                 raise serializers.ValidationError(
-                    'Количество ингредиента должно быть больше 0'
+                    'Минимальное количество ингредиента = 1'
                 )
         cooking_time = data['cooking_time']
         if int(cooking_time) < 0:
             raise serializers.ValidationError(
-                'Время приготовления должно быть больше 0'
+                'Минимальное время приготовления = 1 мин'
             )
         return data
 
@@ -165,6 +180,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
 
     def create(self, validated_data):
+
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
         image = validated_data.pop('image')
@@ -189,10 +205,10 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Recipe
         fields = 'id', 'name', 'image', 'cooking_time'
+        read_only_fields = '__all__',
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -204,6 +220,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
+        extra_kwargs = {
+            'user': {'write_only': True},
+            'recipe': {'write_only': True}
+        }
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
@@ -215,6 +235,10 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
+        extra_kwargs = {
+            'user': {'write_only': True},
+            'recipe': {'write_only': True}
+        }
 
     def validate(self, data):
         if ShoppingCart.objects.filter(
