@@ -3,7 +3,6 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
-
 from recipes.models import (
     Favorite, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag
 )
@@ -22,19 +21,10 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         model = User
-        fields = ('id',
-                  'first_name',
-                  'last_name',
-                  'username',
-                  'email',
-                  'password')
-        extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'username': {'required': True},
-            'email': {'required': True},
-            'password': {'required': True},
-        }
+        fields = (
+            'id', 'first_name', 'last_name',
+            'username', 'email', 'password'
+        )
 
 
 class CustomUserSerializer(UserSerializer):
@@ -105,9 +95,10 @@ class ListRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text',
-                  'cooking_time')
+        fields = (
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
+        )
         read_only_fields = ('is_favorite', 'is_shopping_cart',)
 
     def get_is_favorited(self, obj):
@@ -137,15 +128,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         tags = data['tags']
         if not tags:
             raise serializers.ValidationError(
-                'Нужен хотя бы один тэг'
+                'Нужно добавить тег'
             )
-        if len(tags) != len(set(tags)):
-            raise serializers.ValidationError('Теги не должны повторяться')
         ingredients = data['ingredients']
         if not ingredients or len(ingredients) < 1:
             raise serializers.ValidationError(
-                'Вы из воздуха готовить собираетесь? '
-                'Добавьте хотя бя один ингредиент'
+                'Нужно добавить ингредиент'
             )
         ingredient_list = []
         for ingredient_item in ingredients:
@@ -154,7 +142,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
             if ingredient in ingredient_list:
                 raise serializers.ValidationError(
-                    'Ингредиенты не должны повторяться'
+                    'Такой ингредиент уже добавлен'
                 )
             ingredient_list.append(ingredient)
             if int(ingredient_item['amount']) <= 0:
@@ -177,7 +165,6 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
 
     def create(self, validated_data):
-
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
         image = validated_data.pop('image')
@@ -217,9 +204,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
-        extra_kwargs = {'user': {'write_only': True},
-                        'recipe': {'write_only': True}
-                        }
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
@@ -231,13 +215,12 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
-        extra_kwargs = {'user': {'write_only': True},
-                        'recipe': {'write_only': True}}
 
     def validate(self, data):
-        if ShoppingCart.objects.filter(user=data['user'],
-                                       recipe=data['recipe']).exists():
-            raise serializers.ValidationError('Этот рецепт у Вас уже есть')
+        if ShoppingCart.objects.filter(
+            user=data['user'], recipe=data['recipe']
+        ).exists():
+            raise serializers.ValidationError('Рецепт уже добавлен')
         return data
 
 
@@ -253,8 +236,10 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('id', 'email', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipes_count')
+        fields = (
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count'
+        )
 
     def get_is_subscribed(self, obj):
         return Follow.objects.filter(
