@@ -11,7 +11,7 @@ import django
 django.setup()
 
 
-from api.models import Ingredient, Tag
+from recipes.models import Ingredient, Tag
 
 path = './data'
 os.chdir(path)
