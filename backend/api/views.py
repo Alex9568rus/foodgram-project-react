@@ -1,5 +1,5 @@
 from django.db.models import Sum
-from django.contrib.auth import get_user_model
+#from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -13,7 +13,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from recipes.models import (
     Favorite, Ingredient, Recipe, ShoppingCart, Tag, IngredientRecipe
 )
-from users.models import Follow
+from users.models import Follow, User
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import Pagination
 from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
@@ -22,7 +22,7 @@ from api.serializers import (
     ListRecipeSerializer, ShortRecipeSerializer, TagSerializer
 )
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class CustomUserViewSet(UserViewSet):
@@ -143,10 +143,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 for ingredient in ingredients
         )
         response = HttpResponse(
-            shopping_list, content_type='application/pdf'
+            shopping_list, content_type='text/plain'
         )
         response['Content-Disposition'] = (
-            'attacment; filename="ingredients_in_cart.pdf"'
+            'attacment; filename="ingredients_in_cart.txt"'
         )
         return response
 
