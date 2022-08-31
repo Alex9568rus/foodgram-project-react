@@ -11,8 +11,8 @@ class RecipeFilter(FilterSet):
         to_field_name='slug',
     )
     author = filters.ModelChoiceFilter(queryset=User.objects.all())
-    is_favorited = filters.NumberFilter(method='get_is_favorited')
-    is_in_shopping_cart = filters.NumberFilter(
+    is_favorited = filters.BooleanFilter(method='get_is_favorited')
+    is_in_shopping_cart = filters.BooleanFilter(
         method='get_is_in_shopping_cart'
     )
 
