@@ -8,18 +8,20 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from api.exceptions import (
-    SubscribeError, SubscribeYourselfError, RecipeExistingError
-)
 from recipes.models import (
-    Favorite, Ingredient, Recipe, ShoppingCart, Tag, IngredientRecipe
+    Ingredient, Recipe, Tag, IngredientRecipe
+)
+from api.exceptions import (
+    SubscribeError, SubscribeYourselfError  # RecipeExistingError
 )
 from api.filters import IngredientFilter, RecipeFilter
+from api.mixins import ListOrRetrieveMixin
 from api.pagination import Pagination
 from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from api.serializers import (
     CreateUpdateRecipeSerializer, FollowSerializer, IngredientSerializer,
-    ListRecipeSerializer, ShortRecipeSerializer, TagSerializer
+    ListRecipeSerializer, ShortRecipeSerializer, TagSerializer,
+    ShortRecipeSerializer
 )
 from users.models import Follow, User
 
@@ -99,38 +101,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=True, methods=('post', 'delete'),
-        permission_classes=(IsAuthenticated,)
-    )
-    def favorite(self, request, id=None):
-        if request.method == 'POST':
-            return self.add_obj(Favorite, request.user, id)
-        elif request.method == 'DELETE':
-            return self.delete_obj(Favorite, request.user, id)
+    # @action(
+    #     detail=True, methods=('post', 'delete'),
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def favorite(self, request, id=None):
+    #     if request.method == 'POST':
+    #         return self.add_obj(Favorite, request.user, id)
+    #     elif request.method == 'DELETE':
+    #         return self.delete_obj(Favorite, request.user, id)
 
-    @action(
-        detail=True, methods=('post', 'delete'),
-        permission_classes=(IsAuthenticated,)
-    )
-    def shopping_cart(self, request, id=None):
-        if request.method == 'POST':
-            return self.add_obj(ShoppingCart, request.user, id)
-        elif request.method == 'DELETE':
-            return self.delete_obj(ShoppingCart, request.user, id)
+    # @action(
+    #     detail=True, methods=('post', 'delete'),
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def shopping_cart(self, request, id=None):
+    #     if request.method == 'POST':
+    #         return self.add_obj(ShoppingCart, request.user, id)
+    #     elif request.method == 'DELETE':
+    #         return self.delete_obj(ShoppingCart, request.user, id)
 
-    def add_obj(self, model, user, id):
-        if model.objects.filter(user=user, recipe__id=id).exists():
-            raise RecipeExistingError('Рецепт уже добавлен')
-        recipe = get_object_or_404(Recipe, id=id)
-        model.objects.create(user=user, recipe=recipe)
-        serializer = ShortRecipeSerializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # def add_obj(self, model, user, id):
+    #     if model.objects.filter(user=user, recipe__id=id).exists():
+    #         raise RecipeExistingError('Рецепт уже добавлен')
+    #     recipe = get_object_or_404(Recipe, id=id)
+    #     model.objects.create(user=user, recipe=recipe)
+    #     serializer = ShortRecipeSerializer(recipe)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete_obj(self, model, user, id):
-        obj = model.objects.filter(user=user, recipe__id=id)
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def delete_obj(self, model, user, id):
+    #     obj = model.objects.filter(user=user, recipe__id=id)
+    #     obj.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False, methods=('get',),
@@ -155,3 +157,36 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'attacment; filename="ingredients_in_cart.pdf"'
         )
         return response
+
+
+class GetObject:
+    serializer_class = ShortRecipeSerializer
+    permission_classes = (IsAuthorOrReadOnly, )
+
+    def get_object(self):
+        id = self.kwargs['recipe_id']
+        recipe = get_object_or_404(Recipe, id=id)
+        self.check_object_permissions(self.request, recipe)
+        return recipe
+
+
+class ShoppingCartView(GetObject, ListOrRetrieveMixin):
+    def create(self, request, *args, **kwargs):
+        instance = self.get_object()
+        request.user.cart.recipe.add(instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_destroy(self, instance):
+        self.request.user.cart.recipe.remove(instance)
+
+
+class FavoriteRecipeView(GetObject, ListOrRetrieveMixin):
+    def create(self, request, *args, **kwargs):
+        instance = self.get_object()
+        request.user.favorites.recipe.add(instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_destroy(self, instance):
+        self.request.user.favorites.recipe.remove(instance)
