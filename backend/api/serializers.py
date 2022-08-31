@@ -1,4 +1,3 @@
-#from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
@@ -9,8 +8,6 @@ from recipes.models import (
     Favorite, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag
 )
 from users.models import Follow, User
-
-#User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -29,13 +26,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             'id', 'first_name', 'last_name', 'username',
             'email', 'password'
         )
-        extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'username': {'required': True},
-            'email': {'required': True},
-            'password': {'required': True},
-        }
 
 
 class CustomUserSerializer(UserSerializer):
@@ -157,7 +147,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
             if ingredient in ingredient_list:
                 raise serializers.ValidationError(
-                    'Ингредиенты не должны повторяться'
+                    'Ингредиент уже добавлен'
                 )
             ingredient_list.append(ingredient)
             if int(ingredient_item['amount']) <= 0:
@@ -180,7 +170,6 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
 
     def create(self, validated_data):
-
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
         image = validated_data.pop('image')
@@ -220,10 +209,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
-        extra_kwargs = {
-            'user': {'write_only': True},
-            'recipe': {'write_only': True}
-        }
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
