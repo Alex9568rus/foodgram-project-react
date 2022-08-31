@@ -150,12 +150,12 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                     'Ингредиент уже добавлен'
                 )
             ingredient_list.append(ingredient)
-            if int(ingredient_item['amount']) <= 0:
+            if int(ingredient_item['amount']) < 1:
                 raise serializers.ValidationError(
                     'Минимальное количество ингредиента = 1'
                 )
         cooking_time = data['cooking_time']
-        if int(cooking_time) < 0:
+        if int(cooking_time) < 1:
             raise serializers.ValidationError(
                 'Минимальное время приготовления = 1 мин'
             )
