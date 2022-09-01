@@ -17,15 +17,21 @@ class RecipeFilter(FilterSet):
         model = Recipe
         fields = ('is_favorited', 'is_in_shopping_cart', 'author', 'tags')
 
-    def filter_is_favorited(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
+    def filtering(self, queryset, name, value):
+        if name == 'is_favorited' and value:
             return queryset.filter(favorites__user=self.request.user)
-        return queryset
-
-    def filter_is_in_shopping_cart(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
+        if name == 'is_in_shopping_cart' and value:
             return queryset.filter(cart__user=self.request.user)
-        return queryset
+
+    # def filter_is_favorited(self, queryset, name, value):
+    #     if value and not self.request.user.is_anonymous:
+    #         return queryset.filter(favorites__user=self.request.user)
+    #     return queryset
+
+    # def filter_is_in_shopping_cart(self, queryset, name, value):
+    #     if value and not self.request.user.is_anonymous:
+    #         return queryset.filter(cart__user=self.request.user)
+    #     return queryset
 
 
 class IngredientFilter(FilterSet):
