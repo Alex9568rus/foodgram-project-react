@@ -162,9 +162,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 for ingredient in ingredients
         )
         response = HttpResponse(
-            shopping_list, content_type='text/plain'
+            shopping_list, content_type='application/pdf'
         )
         response['Content-Disposition'] = (
-            'attacment; filename="ingredients_in_cart.txt"'
+            'attacment; filename="ingredients_in_cart.pdf"'
         )
         return response

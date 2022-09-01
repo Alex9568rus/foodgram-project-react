@@ -93,8 +93,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True,
     )
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField(
+        method='get_param', field_name='is_favorited'
+    )
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        method='get_param', field_name='is_in_shopping_cart'
+    )
 
     class Meta:
         model = Recipe
@@ -104,17 +108,29 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('is_favorite', 'is_shopping_cart',)
 
-    def get_is_favorited(self, obj):
+    def get_param(self, obj, name):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
+        if name == 'is_favorited':
+            return Recipe.objects.filter(
+                favorites__user=user, id=obj.id
+            ).exists()
+        if name == 'is_in_shopping_cart':
+            return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
+    # def get_is_favorited(self, obj):
+    #     user = self.context.get('request').user
+    #     if user.is_anonymous:
+    #         return False
+        # return Recipe.objects.filter(
+        #     favorites__user=user, id=obj.id).exists()
+
+    # def get_is_in_shopping_cart(self, obj):
+    #     user = self.context.get('request').user
+    #     if user.is_anonymous:
+    #         return False
+    #     return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
