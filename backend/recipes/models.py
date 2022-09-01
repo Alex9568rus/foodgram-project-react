@@ -77,6 +77,10 @@ class Recipe(models.Model):
         )
     )
 
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
     def __str__(self):
         return f'{self.name}. Автор: {self.author.username}'
 
