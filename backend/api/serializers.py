@@ -251,7 +251,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return Follow.objects.filter(
-            user=obj.user, author=obj.author
+            user=self.request.user, author=obj.author
         ).exists()
 
     def get_recipes(self, obj):
@@ -263,4 +263,4 @@ class FollowSerializer(serializers.ModelSerializer):
         return ShortRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.author).count()
+        return obj.author.recipe.count()
