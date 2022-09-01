@@ -107,25 +107,39 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=True, methods=('post', 'delete'),
-        permission_classes=(IsAuthenticated,)
-    )
-    def favorite(self, request, pk=None):
+    def add_or_delete(self, request, id, model):
+        recipe = get_object_or_404(Recipe, id=id)
+        user = self.request.user
         if request.method == 'POST':
-            return self.add_recipe(Favorite, request, pk)
-        elif request.method == 'DELETE':
-            return self.delete_recipe(Favorite, request, pk)
+            model.objects.create(recipe=recipe, user=user)
+            serializer = SimpleRecipeSerializer(recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            obj = model.objects.filter(recipe=recipe, user=user)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True, methods=('post', 'delete'),
         permission_classes=(IsAuthenticated,)
     )
-    def shopping_cart(self, request, pk=None):
-        if request.method == 'POST':
-            return self.add_recipe(ShoppingCart, request, pk)
-        elif request.method == 'DELETE':
-            return self.delete_recipe(ShoppingCart, request, pk)
+    def favorite(self, request, id):
+        return self.add_or_delete(request, id, Favorite)
+        # if request.method == 'POST':
+        #     return self.add_recipe(Favorite, request, pk)
+        # elif request.method == 'DELETE':
+        #     return self.delete_recipe(Favorite, request, pk)
+
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
+    def shopping_cart(self, request, id):
+        return self.add_or_delete(request, id, ShoppingCart)
+        # if request.method == 'POST':
+        #     return self.add_recipe(ShoppingCart, request, pk)
+        # elif request.method == 'DELETE':
+        #     return self.delete_recipe(ShoppingCart, request, pk)
 
     def add_recipe(self, model, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
@@ -162,9 +176,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 for ingredient in ingredients
         )
         response = HttpResponse(
-            shopping_list, content_type='application/pdf'
+            shopping_list, content_type='text/plain'
         )
         response['Content-Disposition'] = (
-            'attacment; filename="ingredients_in_cart.pdf"'
+            'attacment; filename="ingredients_in_cart.txt"'
         )
         return response
