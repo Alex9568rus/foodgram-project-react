@@ -107,34 +107,41 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
     def favorite(self, request, pk=None):
         if request.method == 'POST':
-            return self.add_obj(Favorite, request.user, pk)
+            return self.add_recipe(Favorite, request, pk)
         elif request.method == 'DELETE':
-            return self.delete_obj(Favorite, request.user, pk)
+            return self.delete_recipe(Favorite, request, pk)
 
-    @action(detail=True, methods=('post', 'delete'),
-            permission_classes=(IsAuthenticated,))
+    @action(
+        detail=True, methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated,)
+    )
     def shopping_cart(self, request, pk=None):
         if request.method == 'POST':
-            return self.add_obj(ShoppingCart, request.user, pk)
+            return self.add_recipe(ShoppingCart, request, pk)
         elif request.method == 'DELETE':
-            return self.delete_obj(ShoppingCart, request.user, pk)
+            return self.delete_recipe(ShoppingCart, request, pk)
 
-    def add_obj(self, model, user, pk):
-        if model.objects.filter(user=user, recipe__id=pk).exists():
+    def add_recipe(self, model, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        user = self.request.user
+        if model.objects.filter(recipe=recipe, user=user).exists():
             return Response({
                 'errors': 'Рецепт уже добавлен в список.'
             }, status=status.HTTP_400_BAD_REQUEST)
-        recipe = get_object_or_404(Recipe, id=pk)
-        model.objects.create(user=user, recipe=recipe)
+        model.objects.create(recipe=recipe, user=user)
         serializer = ShortRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete_obj(self, model, user, pk):
-        obj = model.objects.filter(user=user, recipe__id=pk)
+    def delete_recipe(self, model, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        user = self.request.user
+        obj = model.objects.filter(recipe=recipe, user=user)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
