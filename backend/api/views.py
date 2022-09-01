@@ -17,8 +17,8 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import Pagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (
-    CreateUpdateRecipeSerializer, FollowSerializer, IngredientSerializer,
-    ListRecipeSerializer, ShortRecipeSerializer, TagSerializer
+    CreateRecipeSerializer, FollowSerializer, IngredientSerializer,
+    RecipeSerializer, SimpleRecipeSerializer, TagSerializer
 )
 
 
@@ -90,7 +90,6 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
     pagination_class = None
-    # search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -102,8 +101,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
-            return ListRecipeSerializer
-        return CreateUpdateRecipeSerializer
+            return RecipeSerializer
+        return CreateRecipeSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -136,7 +135,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'errors': 'Рецепт уже добавлен в список.'
             }, status=status.HTTP_400_BAD_REQUEST)
         model.objects.create(recipe=recipe, user=user)
-        serializer = ShortRecipeSerializer(recipe)
+        serializer = SimpleRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_recipe(self, model, request, pk):

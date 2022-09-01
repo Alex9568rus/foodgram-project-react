@@ -1,10 +1,8 @@
 from django_filters.rest_framework import FilterSet, filters
 from recipes.models import Recipe, Ingredient, Tag
-# from rest_framework.filters import SearchFilter
 
 
 class RecipeFilter(FilterSet):
-    # tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         queryset=Tag.objects.all(),
@@ -32,7 +30,6 @@ class RecipeFilter(FilterSet):
 
 class IngredientFilter(FilterSet):
     name = filters.CharFilter(lookup_expr='icontains')
-    # search_param = 'name'
 
     class Meta:
         model = Ingredient

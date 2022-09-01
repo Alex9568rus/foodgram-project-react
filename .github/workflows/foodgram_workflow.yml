@@ -87,7 +87,7 @@ jobs:
             sudo docker pull ${{ secrets.USERNAME }}/foodgram_back:latest
             sudo docker pull ${{ secrets.USERNAME }}/foodgram_front:latest
             sudo docker-copmose stop
-            sudo docker-compose rm zhbakov_backend_1
+            sudo docker-compose rm backend
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env

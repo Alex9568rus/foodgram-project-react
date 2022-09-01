@@ -10,7 +10,7 @@ from recipes.models import (
 from users.models import Follow, User
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class CreateUserSerializer(UserCreateSerializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(
             queryset=User.objects.all())]
@@ -57,7 +57,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
 
 
-class ListIngredientRecipeSerializer(serializers.ModelSerializer):
+class IngredientRecipeSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -75,7 +75,7 @@ class ListIngredientRecipeSerializer(serializers.ModelSerializer):
         ]
 
 
-class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
+class AddIngredientSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
@@ -84,11 +84,11 @@ class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount')
 
 
-class ListRecipeSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(max_length=None, use_url=True)
     tags = TagSerializer(read_only=True, many=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = ListIngredientRecipeSerializer(
+    ingredients = IngredientRecipeSerializer(
         source='recipe_ingredient',
         many=True,
         read_only=True,
@@ -117,10 +117,10 @@ class ListRecipeSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
 
-class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
+class CreateRecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField(max_length=None, use_url=True)
-    ingredients = CreateIngredientRecipeSerializer(many=True)
+    ingredients = AddIngredientSerializer(many=True)
 
     class Meta:
         model = Recipe
@@ -161,7 +161,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def create_ingredients(self, ingredients, recipe):
+    def add_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
                 recipe=recipe,
@@ -174,7 +174,7 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         ingredients_data = validated_data.pop('ingredients')
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, **validated_data)
-        self.create_ingredients(ingredients_data, recipe)
+        self.add_ingredients(ingredients_data, recipe)
         recipe.tags.set(tags_data)
         return recipe
 
@@ -182,17 +182,17 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         instance.ingredients.clear()
-        self.create_ingredients(ingredients, instance)
+        self.add_ingredients(ingredients, instance)
         instance.tags.clear()
         instance.tags.set(tags)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         context = self.context
-        return ListRecipeSerializer(instance, context=context).data
+        return RecipeSerializer(instance, context=context).data
 
 
-class ShortRecipeSerializer(serializers.ModelSerializer):
+class SimpleRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = 'id', 'name', 'image', 'cooking_time'
@@ -262,7 +262,7 @@ class FollowSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj.author)
         if limit:
             queryset = queryset[:int(limit)]
-        return ShortRecipeSerializer(queryset, many=True).data
+        return SimpleRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
