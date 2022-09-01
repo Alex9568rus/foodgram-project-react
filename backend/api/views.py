@@ -107,8 +107,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def add_or_delete(self, request, id, model):
-        recipe = get_object_or_404(Recipe, id=id)
+    def add_or_delete(self, request, pk, model):
+        recipe = get_object_or_404(Recipe, id=pk)
         user = self.request.user
         if request.method == 'POST':
             model.objects.create(recipe=recipe, user=user)
@@ -123,8 +123,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True, methods=('post', 'delete'),
         permission_classes=(IsAuthenticated,)
     )
-    def favorite(self, request, id):
-        return self.add_or_delete(request, id, Favorite)
+    def favorite(self, request, pk):
+        return self.add_or_delete(request, pk, Favorite)
         # if request.method == 'POST':
         #     return self.add_recipe(Favorite, request, pk)
         # elif request.method == 'DELETE':
@@ -134,8 +134,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True, methods=('post', 'delete'),
         permission_classes=(IsAuthenticated,)
     )
-    def shopping_cart(self, request, id):
-        return self.add_or_delete(request, id, ShoppingCart)
+    def shopping_cart(self, request, pk):
+        return self.add_or_delete(request, pk, ShoppingCart)
         # if request.method == 'POST':
         #     return self.add_recipe(ShoppingCart, request, pk)
         # elif request.method == 'DELETE':
