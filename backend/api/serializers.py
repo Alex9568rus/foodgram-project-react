@@ -209,6 +209,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
 
+    def create(self, validated_data):
+        favorite = Favorite.objects.create(**validated_data)
+        favorite.save()
+        return favorite
+
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='recipe.id')
@@ -219,10 +224,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('id', 'name', 'image', 'cooking_time', 'user', 'recipe')
-        extra_kwargs = {
-            'user': {'write_only': True},
-            'recipe': {'write_only': True}
-        }
 
     def validate(self, data):
         if ShoppingCart.objects.filter(
