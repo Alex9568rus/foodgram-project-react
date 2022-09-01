@@ -265,4 +265,4 @@ class FollowSerializer(serializers.ModelSerializer):
         return ShortRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
-        return obj.author.recipe.count()
+        return obj.author.recipes.count()
