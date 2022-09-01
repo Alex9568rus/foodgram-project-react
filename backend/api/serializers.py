@@ -93,12 +93,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True,
     )
-    is_favorited = serializers.SerializerMethodField(
-        method='get_param', field_name='is_favorited'
-    )
-    is_in_shopping_cart = serializers.SerializerMethodField(
-        method='get_param', field_name='is_in_shopping_cart'
-    )
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
